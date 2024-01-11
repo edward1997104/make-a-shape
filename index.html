@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)https://appsrv.cse.cuhk.edu.hk/~haoxu/projects/TilinGnn/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" href="./resources/styles.css">
+  <title>Neural Wavelet-domain Diffusion for 3D Shape Generation</title>
+  <meta name="description" content="Make-A-Shape: a Ten-Million-scale 3D Shape Model2">
+  
+<!--  <meta property="og:image" content="http://appsrv.cse.cuhk.edu.hk/~haoxu/projects/TilinGnn/figures/tilingnn.png">-->
+  <meta property="og:title" content="Make-A-Shape: a Ten-Million-scale 3D Shape Model">
+  <script type="text/javascript">
+    google.load("jquery", "1.3.2");
+  </script>
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style type="text/css">
+    body {
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+    font-weight: 300;
+    font-size: 18px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 1100px;
+    }
+
+    h1 {
+    font-weight: 300;
+    }
+
+    .disclaimerbox {
+      background-color: #eee;
+      border: 1px solid #eeeeee;
+      border-radius: 10px;
+      -moz-border-radius: 10px;
+      -webkit-border-radius: 10px;
+      padding: 20px;
+    }
+
+    video.header-vid {
+      height: 140px;
+      border: 1px solid black;
+      border-radius: 10px;
+      -moz-border-radius: 10px;
+      -webkit-border-radius: 10px;
+    }
+
+    img.header-img {
+      height: 140px;
+      border: 1px solid black;
+      border-radius: 10px;
+      -moz-border-radius: 10px;
+      -webkit-border-radius: 10px;
+    }
+
+    img.rounded {
+    border: 0px solid #eeeeee;
+    border-radius: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    margin-top: -35px;
+    }
+
+    a:link,
+    a:visited {
+      color: #1367a7;
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: #208799;
+    }
+
+    td.dl-link {
+      height: 160px;
+      text-align: center;
+      font-size: 22px;
+    }
+
+    .layered-paper-big {
+      /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
+      box-shadow:
+        0px 0px 1px 1px rgba(0, 0, 0, 0.35),
+        /* The top layer shadow */
+        5px 5px 0 0px #fff,
+        /* The second layer */
+        5px 5px 1px 1px rgba(0, 0, 0, 0.35),
+        /* The second layer shadow */
+        10px 10px 0 0px #fff,
+        /* The third layer */
+        10px 10px 1px 1px rgba(0, 0, 0, 0.35),
+        /* The third layer shadow */
+        15px 15px 0 0px #fff,
+        /* The fourth layer */
+        15px 15px 1px 1px rgba(0, 0, 0, 0.35),
+        /* The fourth layer shadow */
+        20px 20px 0 0px #fff,
+        /* The fifth layer */
+        20px 20px 1px 1px rgba(0, 0, 0, 0.35),
+        /* The fifth layer shadow */
+        25px 25px 0 0px #fff,
+        /* The fifth layer */
+        25px 25px 1px 1px rgba(0, 0, 0, 0.35);
+      /* The fifth layer shadow */
+      margin-left: 10px;
+      margin-right: 45px;
+    }
+
+    .paper-big {
+      /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
+      box-shadow:
+        0px 0px 1px 1px rgba(0, 0, 0, 0.35);
+      /* The top layer shadow */
+      margin-left: 10px;
+      margin-right: 45px;
+    }
+
+    .layered-paper {
+      /* modified from: http://css-tricks.com/snippets/css/layered-paper/ */
+      box-shadow:
+        0px 0px 1px 1px rgba(0, 0, 0, 0.35),
+        /* The top layer shadow */
+        5px 5px 0 0px #fff,
+        /* The second layer */
+        5px 5px 1px 1px rgba(0, 0, 0, 0.35),
+        /* The second layer shadow */
+        10px 10px 0 0px #fff,
+        /* The third layer */
+        10px 10px 1px 1px rgba(0, 0, 0, 0.35);
+      /* The third layer shadow */
+      margin-top: 5px;
+      margin-left: 10px;
+      margin-right: 30px;
+      margin-bottom: 5px;
+    }
+
+    .vert-cent {
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    hr {
+      border: 0;
+      height: 1px;
+      background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+    }
+  </style>
+  <title></title>
+</head>
+
+<body data-gr-c-s-loaded="true" cz-shortcut-listen="true">
+  <br>
+  <center>
+    <span style="font-size:34px">Make-A-Shape: a Ten-Million-scale 3D Shape Model</span><br>
+    <br>
+    <table align="center" width="1200px">
+      <tbody>
+        <tr>
+          <td align="center" width="150px">
+            <center>
+              <span style="font-size:22px"><a>Ka-Hei Hui<sup>1</sup></a></span>
+            </center>
+          </td>
+          <td align="center" width="150px">
+            <center>
+              <span style="font-size:22px"><a>Aditya Sanghi<sup>2</sup></span>
+            </center>
+          </td>
+          <td align="center" width="150px">
+            <center>
+              <span style="font-size:22px">Arianna Rampini<sup>2</sup></a></span>
+            </center>
+          </td>
+          <td align="center" width="200px">
+            <center>
+              <span style="font-size:22px">Kamal Rahimi Malekshan<sup>2</sup></a></span>
+            </center>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" width="400px">
+            <center>
+              <span style="font-size:22px"><a>Zhezheng Liu<sup>1</sup></a></span>
+            </center>
+          </td>
+          <td align="center" width="400px">
+            <center>
+              <span style="font-size:22px"><a>Hooman Shayani<sup>2</sup></a></span>
+            </center>
+          </td>
+          <td align="center" width="400px">
+            <center>
+              <span style="font-size:22px"><a>Chi-Wing Fu<sup>1</sup></a></span>
+            </center>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table align="center" width="800px">
+      <tbody>
+        <tr>
+          <td align="center" width="50px"></td>
+          <td align="center" width="400px">
+            <center>
+              <img class="img-fluid d-block logo" height="50px" src="./resources/cuhk_logo.png">
+            </center>
+          </td>
+          <td align="center" width="300px">
+            <center>
+              <img class="img-fluid d-block logo" height="50px" src="./resources/hunan_logo.png">
+            </center>
+          </td>
+          <td align="center" width="50px"></td>
+        </tr>
+      </tbody>
+    </table>
+    <table align="center" width="800px">
+      <tbody>
+        <tr>
+          <td align="center" width="800px&quot;">
+            <center></center>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+<!--    <h3 class=""><span style="font-weight: normal;">SIGGRAPH Asia 2022 (Conference Track)</span></h3>-->
+<!--	<h3 class=""><span style="font-weight: normal; margin-top: -10px;">ACM Transaction on Graphics (SIGGRAPH Asia) 38, 6 (2019)</span></h3>
+-->
+    <br>
+    <table align="center" width="1100px">
+      <tbody>
+        <tr>
+          <td align="center" width="275px">
+            <center>
+              <span style="font-size:18px"></span>
+            </center>
+          </td>
+          <td align="center" width="275px">
+            <center>
+              <span style="font-size:18px"></span>
+            </center>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </center>
+  <br>
+  <table align="center" width="1100px">
+
+    <tbody>
+      <tr>
+        <td width="400px">
+          <center style="">
+            <img class="rounded" src="./resources/teaser.png" width="1000px">
+            <span class="description" align="center">
+                Our shape model, known as Make-A-Shape, has been trained on 10 million diverse 3D shapes. It exhibits the capability to
+unconditionally generate a wide range of 3D shapes, featuring intricate geometric details, plausible structures, nontrivial topologies, and
+clean surfaces, as demonstrated above.
+              </span>
+            <br>
+          </center>
+        </td>
+      </tr>
+      <tr>
+        <td width="400px">
+          <center style="">
+            <img class="rounded" src="./resources/overview.png" width="1000px">
+            <span class="description" align="center">
+              Overview of our generative approach. (a) A shape is first encoded into a truncated signed distance field (TSDF), then decomposed
+into multi-scale wavelet coefficients in a wavelet-tree structure. We design the subband coefficient filtering procedure to exploit the
+relations among coefficients and extract high-information coefficients to build our wavelet-tree representation. (b) We propose the subband
+coefficient packing scheme to rearrange our wavelet-tree representation into a regular grid structure of manageable spatial resolution,
+so that we can adopt a denoising diffusion model to effectively generate the representation from noise. (c) Further, we formulate the
+subband adaptive training strategy to effectively balance the shape information in different subbands and address the detail coefficient
+sparsity. Hence, we can efficiently train our model on millions of 3D shapes. (d) Our framework can be extended to condition on different
+modalities.
+            </span>
+            <br>
+          </center>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <br>
+  <hr>
+  <center>
+    <h1>Abstract</h1>
+    Significant progress has been made in training large generative models for natural language and images. However, the advancement of 3D generative models has been slower, hindered by their substantial resource demands for training, along with inefficient, non-compact, and less expressive representations. This paper introduces a novel 3D generative model, termed Make-A-Shape, which is designed for efficient training on a vast scale, utilizing 10 million publicly available shapes. We first introduce an innovative 3D representation named the wavelet-tree representation, efficiently encoding high-resolution signed distance fields (on a 256^3 grid) into a compact set of wavelet coefficients with minimal information loss, crucial for efficient data streaming in large-scale training. We then illustrate how this compact
+    representation can be transformed into a grid structure with
+    low spatial resolution using our coefficient packing scheme.
+    Subsequently, a diffusion-based generative model can be
+    employed on this grid, trained using our adaptive loss function. This approach facilitates large-scale training that
+    can be conditioned on various modalities, including single/multiple images, point clouds, and low-resolution voxels. In our extensive set of experiments, we showcase several applications, including unconditional generation and
+    shape completion, and establish that our approach not only
+    outperforms state-of-the-art techniques in delivering high-quality results but also generates shapes within a mere 2
+    seconds, surpassing all existing baselines.
+  </center>.<br><br>
+  <hr>
+  <br>
+<center>
+  <h1>Single-view Image Conditioned Generation </h1>
+</center>
+<br>
+  <table align="center"> <!-- Table with a border -->
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fe8cf5ab2e5f4b1ea7f266eed0ce4792_input%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fe8cf5ab2e5f4b1ea7f266eed0ce4792_3.gif" width="300"></td>
+      <td><img src="./resources/inputs/fdb7e646-017e-4faf-a81f-21369ded1f72_input%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fdb7e646-017e-4faf-a81f-21369ded1f72_2.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fd76856d-b322-4b34-a707-cc86718672ce_input%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fd76856d-b322-4b34-a707-cc86718672ce_2.gif" width="300"></td>
+      <td><img src="./resources/inputs/fd17db75-dd83-46e7-a871-4a98d2232a9d_input%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fd17db75-dd83-46e7-a871-4a98d2232a9d_2.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fd6693f7-1038-4367-b52e-2ba9cdf0e697_input%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fd6693f7-1038-4367-b52e-2ba9cdf0e697_3.gif" width="300"></td>
+      <td><img src="./resources/inputs/fb1829cb-dffd-4c9b-bec8-4c90fd9086ef_input%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb1829cb-dffd-4c9b-bec8-4c90fd9086ef_0.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fd2706e9-228a-4f00-85d4-60dcd8f0742e_input%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fd2706e9-228a-4f00-85d4-60dcd8f0742e_0.gif" width="300"></td>
+      <td><img src="./resources/inputs/fd64cbbd-df6a-465a-87c7-fe28fe3e399b_input%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fd64cbbd-df6a-465a-87c7-fe28fe3e399b_3.gif" width="300"></td>
+    </tr>
+    <!-- Add more rows and cells as needed -->
+  </table>
+<hr>
+  <center>
+    <h1>Multi-view Images Conditioned Generation </h1>
+  </center>
+  <table align="center"> <!-- Table with a border -->
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/Group%20829.png" width="300"></td>
+      <td><img src="./resources/gifs/00983552_4968f8c883d058c8552b8d48_trimesh_000_1.gif" width="300"></td>
+      <td><img src="./resources/inputs/Group%20828.png" width="300"></td>
+      <td><img src="./resources/gifs/facbbd12daf6476faf65ce84ee131498_1.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/Group%20827.png" width="300"></td>
+      <td><img src="./resources/gifs/fae270f24b9c441ab92668791822a337_2.gif" width="300"></td>
+      <td><img src="./resources/inputs/Group%20826.png" width="300"></td>
+      <td><img src="./resources/gifs/fb5ed7835284469f8b45f5eaab1830e9_0.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/Group%20830.png" width="300"></td>
+      <td><img src="./resources/gifs/fb9e573f-607d-4333-8df8-49be1eea9839_1.gif" width="300"></td>
+      <td><img src="./resources/inputs/Group%20816.png" width="300"></td>
+      <td><img src="./resources/gifs/B087GY33CP_1.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/Group%20821.png" width="300"></td>
+      <td><img src="./resources/gifs/fb07dc6a-ba33-4295-b625-f6f6abc09e7a_1.gif" width="300"></td>
+      <td><img src="./resources/inputs/Group%20831.png" width="300"></td>
+      <td><img src="./resources/gifs/fb8bb2ac-b23d-441e-a37e-f4f1dbd2ea8e_1.gif" width="300"></td>
+    </tr>
+    <!-- Add more rows and cells as needed -->
+  </table>
+  <hr>
+  <center>
+    <h1>Point Cloud Conditioned Generation </h1>
+  </center>
+  <table> <!-- Table with a border -->
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fad9484e17da44c0ad3a919c5ba072b2_pointcloud_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fad9484e17da44c0ad3a919c5ba072b2_2.gif" width="300"></td>
+      <td><img src="./resources/inputs/fb13b58823cb4c908d2a1cc8327b1f01_pointcloud_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb13b58823cb4c908d2a1cc8327b1f01_1.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/faef24bd-878e-4213-94c2-a040a1fde2bb_pointcloud_3%201.png" width="300"></td>
+      <td><img src="./resources/gifs/faef24bd-878e-4213-94c2-a040a1fde2bb_2.gif" width="300"></td>
+      <td><img src="./resources/inputs/fb7f0529-414c-4fc3-b2eb-fb16186a335c_pointcloud_0%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb7f0529-414c-4fc3-b2eb-fb16186a335c_0.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fb0045dd-ae70-44c5-9d64-3a9cbc197281_pointcloud%20(1)_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb0045dd-ae70-44c5-9d64-3a9cbc197281_1.gif" width="300"></td>
+      <td><img src="./resources/inputs/00984720_157cf816ad285843b67b9e8c_trimesh_000_pointcloud_0%201.png" width="300"></td>
+      <td><img src="./resources/gifs/00984720_157cf816ad285843b67b9e8c_trimesh_000_1.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fb6a0b6b-e3d0-45bd-9cb1-5720f5b74fde_pointcloud_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb6a0b6b-e3d0-45bd-9cb1-5720f5b74fde_0.gif" width="300"></td>
+      <td><img src="./resources/inputs/fb9eb858a69547cbac45fc1d1445ec74_pointcloud_1%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb9eb858a69547cbac45fc1d1445ec74_0.gif" width="300"></td>
+    </tr>
+    <!-- Add more rows and cells as needed -->
+  </table>
+
+  <hr>
+  <center>
+  <h1>Voxels Conditioned Generation (16^3) </h1>
+  </center>
+  <table> <!-- Table with a border -->
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/faeab5ae48db457abc390b65f793e961_16_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/faeab5ae48db457abc390b65f793e961_0.gif" width="300"></td>
+      <td><img src="./resources/inputs/fad4dce3ee1541e38b5186a0bc163549_16_0%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fad4dce3ee1541e38b5186a0bc163549_3.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fad37e71dba4469fa1abe2cd5e763dab_16_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fad37e71dba4469fa1abe2cd5e763dab_2.gif" width="300"></td>
+      <td><img src="./resources/inputs/faffd877-6866-40a7-8790-d63cac403e62_16_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/faffd877-6866-40a7-8790-d63cac403e62_0.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fb327213-df41-4103-ae05-5ab89ac27827_16_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb327213-df41-4103-ae05-5ab89ac27827_3.gif" width="300"></td>
+      <td><img src="./resources/inputs/fb9ef098-24f0-4b95-8656-86f2768ecfb5_16_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb9ef098-24f0-4b95-8656-86f2768ecfb5_0.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fb584bb1-ef02-4ccf-a0ee-a9ed072eef8a_16_1%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb584bb1-ef02-4ccf-a0ee-a9ed072eef8a_1.gif" width="300"></td>
+      <td><img src="./resources/inputs/fb21c6b4-7195-4392-a383-3e660eeae5f9_16_0%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fb21c6b4-7195-4392-a383-3e660eeae5f9_3.gif" width="300"></td>
+    </tr>
+    <!-- Add more rows and cells as needed -->
+  </table>
+
+  <hr>
+  <center>
+    <h1>Voxels Conditioned Generation (32^3) </h1>
+  </center>
+  <table> <!-- Table with a border -->
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/ffd5a02a-fb23-4358-a9fb-cf15f377f3e1_32_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/ffd5a02a-fb23-4358-a9fb-cf15f377f3e1_1.gif" width="300"></td>
+      <td><img src="./resources/inputs/ffcf8bd6-757f-4450-ab60-31e609eb4e58_32_2%201.png" width="300"></td>
+      <td><img src="./resources/gifs/ffcf8bd6-757f-4450-ab60-31e609eb4e58_1.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/fff01de6-6a38-4637-a619-4e889526560e_32_3%201.png" width="300"></td>
+      <td><img src="./resources/gifs/fff01de6-6a38-4637-a619-4e889526560e_0.gif" width="300"></td>
+      <td><img src="./resources/inputs/mesh_968_32_0%201.png" width="300"></td>
+      <td><img src="./resources/gifs/mesh_968_1.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/thing-9803-file-30891_32_1%201.png" width="300"></td>
+      <td><img src="./resources/gifs/thing-9803-file-30891_0.gif" width="300"></td>
+      <td><img src="./resources/inputs/ffd5275c-5914-4c3f-8922-2c65356deb74_32_1%201.png" width="300"></td>
+      <td><img src="./resources/gifs/ffd5275c-5914-4c3f-8922-2c65356deb74_3.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/thing-8656-file-26931_32_3%201.png" width="300"></td>
+      <td><img src="./resources/gifs/thing-8656-file-26931_0.gif" width="300"></td>
+      <td><img src="./resources/inputs/ffc236b6-4dfd-4a98-905b-37f0d22f5730_32_0%201.png" width="300"></td>
+      <td><img src="./resources/gifs/ffc236b6-4dfd-4a98-905b-37f0d22f5730_0.gif" width="300"></td>
+    </tr>
+    <!-- Add more rows and cells as needed -->
+  </table>
+
+  <hr>
+  <center>
+    <h1>Shape Completion </h1>
+  </center>
+  <table> <!-- Table with a border -->
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/pig_031_masked_2%202.png" width="300"></td>
+      <td><img src="./resources/gifs/pig_031_1.gif" width="300"></td>
+      <td><img src="./resources/gifs/pig_031_3.gif" width="300"></td>
+      <td><img src="./resources/gifs/pig_031_9.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/glass_003_masked_2%202.png" width="300"></td>
+      <td><img src="./resources/gifs/glass_003_4.gif" width="300"></td>
+      <td><img src="./resources/gifs/glass_003_5.gif" width="300"></td>
+      <td><img src="./resources/gifs/glass_003_6.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/cow_018_masked_2%202.png" width="300"></td>
+      <td><img src="./resources/gifs/cow_018_0.gif" width="300"></td>
+      <td><img src="./resources/gifs/cow_018_4.gif" width="300"></td>
+      <td><img src="./resources/gifs/cow_018_9.gif" width="300"></td>
+    </tr>
+    <tr> <!-- First row of the table -->
+      <td><img src="./resources/inputs/scissors_0082_masked_3%202.png" width="300"></td>
+      <td><img src="./resources/gifs/scissors_0082_2.gif" width="300"></td>
+      <td><img src="./resources/gifs/scissors_0082_4.gif" width="300"></td>
+      <td><img src="./resources/gifs/scissors_0082_6.gif" width="300"></td>
+    </tr>
+    <!-- Add more rows and cells as needed -->
+  </table>
+<!--  <table align="center" width="1100px">-->
+<!--    <tbody>-->
+<!--      <tr>-->
+<!--        <td width="400px">-->
+<!--          <center style="">-->
+<!--            <img class="rounded" src="./resources/gallery.png" width="1000px">-->
+<!--            <span class="description" align="left">Gallery of our generated shapes: Table, Chair, Cabinet, and Airplane (top to bottom). Our shapes exhibit complex structures, fine details, and clean surfaces, without obvious artifacts, compared with those generated by others.</span>-->
+<!--            <br>-->
+<!--          </center>-->
+<!--        </td>-->
+<!--      </tr>-->
+<!--    </tbody>-->
+<!--    <tbody>-->
+<!--    <tr>-->
+<!--      <td width="400px">-->
+<!--        <center style="">-->
+<!--          <img class="rounded" src="./resources/novel_analysis.png" width="750px">-->
+<!--          <span class="description" align="left">Shape novelty analysis. Top: From our generated shape (in green), we retrieve top-four most similar shapes (in blue) in training set by CD and LFD. Bottom: We generate 500 chairs using our method; for each chair, we retrieve the most similar shape in the training set by LFD; then, we plot the distribution of LFDs for all retrievals, showing that our method is able to generate shapes that are more similar (low LFDs) or more novel (high LFDs) compared to the training set. Note that the generated shape at 50th percentile is already not that similar to the associated training-set shape.</span>-->
+<!--          <br>-->
+<!--        </center>-->
+<!--      </td>-->
+<!--    </tr>-->
+<!--    </tbody>-->
+<!--  </table>-->
+  <hr>
+  <center>
+    <h1>Paper</h1>
+  </center>
+  <table align="center" width="500" px="">
+    <tbody>
+      <tr>
+        <td><a href="https://appsrv.cse.cuhk.edu.hk/~khhui/projects/WaveletGen/"><img class="layered-paper-big" style="height:175px" src="./resources/paper.png"></a></td>
+        <td>
+          <strong><span style="font-size:12pt">Make-A-Shape: a Ten-Million-scale 3D Shape Model</span></strong><br>
+<!--          <span style="font-size:12pt">In SIGGRAPH Asia 2022. <br>-->
+        <a>[Paper]</a>
+<!--        <a href="https://appsrv.cse.cuhk.edu.hk/~khhui/projects/WaveletGen/hui-2022-WaveletGen-sup.pdf">[supp]</a>-->
+<!--        <a href="https://appsrv.cse.cuhk.edu.hk/~haoxu/projects/TilinGnn/TilinGNN_present.mp4">[presentation]</a>-->
+<!--        <a href="https://github.com/edward1997104/Wavelet-Generation">[code]</a>-->
+
+      </span></td>
+      </tr>
+    </tbody>
+  </table>
+  <br><br>
+<!--  <hr>-->
+<!--  <div class="py-5">-->
+<!--    <div class="container">-->
+<!--      <div class="row">-->
+<!--        <div class="col-md-12">-->
+<!--          <h1 class="" align="center">Video</h1>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="container">-->
+<!--        <div class="row">-->
+<!--          <div class="col-md-12">-->
+<!--            <iframe align="center" width="1120" height="630" src="https://www.youtube.com/embed/3WBNjEAqh98" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--  <hr>-->
+<!--  <div class="py-5">-->
+<!--    <div class="container">-->
+<!--      <div class="row">-->
+<!--        <div class="col-md-12">-->
+<!--          <h1 class="" align="center">Bibtex</h1>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--      <div class="row">-->
+<!--        <div class="col-md-12">-->
+<!--          <pre align="left">-->
+<!--            @inproceedings{hui2022template,-->
+<!--                title = {Neural Template: Topology-aware Reconstruction and Disentangled Generation of 3D Meshes},-->
+<!--                author = {Ka-Hei Hui* and Ruihui Li and Jingyu Wu and Chi-Wing Fu(* joint first authors)},-->
+<!--                booktitle={IEEE Conference on Computer Vision and Pattern Recognition (CVPR)},-->
+<!--                year={2022}-->
+<!--            }-->
+<!--&lt;!&ndash;            To be updated.&ndash;&gt;-->
+<!--          </pre>-->
+<!--        </div>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--  <hr>-->
+<!--<table align="center" width="1100px">-->
+<!--    <tbody>-->
+<!--      <tr>-->
+<!--        <td width="400px">-->
+<!--          <left>-->
+<!--            <center>-->
+<!--              <h1>Acknowledgments</h1>-->
+<!--            </center>-->
+<!--            We would like to thank the anonymous reviewers for their-->
+<!--            valuable comments. We also acknowledge help from Tianyu Wang-->
+<!--            for various visualizations in the paper. This work is supported by-->
+<!--            Research Grants Council of the Hong Kong Special Administrative-->
+<!--            Region (Project No. CUHK 14206320 & 14201921) and National-->
+<!--            Natural Science Foundation of China (No. 62202151). </left>-->
+<!--        </td>-->
+<!--      </tr>-->
+<!--    </tbody>-->
+<!--  </table>-->
+<!--  <br>-->
+<!--  <br>-->
+  <div class="py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12"></div>
+      </div>
+    </div>
+  </div>
+  <div class="py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12"></div>
+      </div>
+    </div>
+  </div>
+	<hr>
+  <div class="py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12"> </div>
+      </div>
+    </div>
+  </div>
+<!--  <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=DFF8TrijqogUKFMsK-xccbubxp3Kx2RwTiH_p-AtTlw&cl=ffffff&w=a"></script>-->
