@@ -274,14 +274,7 @@ clean surfaces, as demonstrated above.
           <center style="">
             <img class="rounded" src="./resources/overview.png" width="1000px">
             <span class="description" align="center">
-              Overview of our generative approach. (a) A shape is first encoded into a truncated signed distance field (TSDF), then decomposed
-into multi-scale wavelet coefficients in a wavelet-tree structure. We design the subband coefficient filtering procedure to exploit the
-relations among coefficients and extract high-information coefficients to build our wavelet-tree representation. (b) We propose the subband
-coefficient packing scheme to rearrange our wavelet-tree representation into a regular grid structure of manageable spatial resolution,
-so that we can adopt a denoising diffusion model to effectively generate the representation from noise. (c) Further, we formulate the
-subband adaptive training strategy to effectively balance the shape information in different subbands and address the detail coefficient
-sparsity. Hence, we can efficiently train our model on millions of 3D shapes. (d) Our framework can be extended to condition on different
-modalities.
+              Figure 4. Overview of our generative approach. (a) A shape is first encoded into a truncated signed distance field (TSDF), then decomposed into multi-scale wavelet coefficients in a wavelet-tree structure. We design the subband coefficient filtering procedure to exploit the relations among coefficients and extract information-rich coefficients to build our wavelet-tree representation. (b) We propose the subband coefficient packing scheme to rearrange our wavelet-tree representation into a regular grid structure of manageable spatial resolution, so that we can adopt a denoising diffusion model to effectively generate the representation. (c) Further, we formulate the subband adaptive training strategy to effectively balance the shape information in different subbands and address the detail coefficient sparsity. Hence, we can efficiently train our model on millions of 3D shapes. (d) Our framework can be extended to condition on various modalities.
             </span>
             <br>
           </center>
@@ -293,15 +286,7 @@ modalities.
   <hr>
   <center>
     <h1>Abstract</h1>
-    Significant progress has been made in training large generative models for natural language and images. However, the advancement of 3D generative models has been slower, hindered by their substantial resource demands for training, along with inefficient, non-compact, and less expressive representations. This paper introduces a novel 3D generative model, termed Make-A-Shape, which is designed for efficient training on a vast scale, utilizing 10 million publicly available shapes. We first introduce an innovative 3D representation named the wavelet-tree representation, efficiently encoding high-resolution signed distance fields (on a 256^3 grid) into a compact set of wavelet coefficients with minimal information loss, crucial for efficient data streaming in large-scale training. We then illustrate how this compact
-    representation can be transformed into a grid structure with
-    low spatial resolution using our coefficient packing scheme.
-    Subsequently, a diffusion-based generative model can be
-    employed on this grid, trained using our adaptive loss function. This approach facilitates large-scale training that
-    can be conditioned on various modalities, including single/multiple images, point clouds, and low-resolution voxels. In our extensive set of experiments, we showcase several applications, including unconditional generation and
-    shape completion, and establish that our approach not only
-    outperforms state-of-the-art techniques in delivering high-quality results but also generates shapes within a mere 2
-    seconds, surpassing all existing baselines.
+    Significant progress has been made in training large generative models for natural language and images. Yet, the advancement of 3D generative models is hindered by their substantial resource demands for training, along with inefficient, non-compact, and less expressive representations. This paper introduces Make-A-Shape, a new 3D generative model designed for efficient training on a vast scale, capable of utilizing 10 millions publicly-available shapes. Technical-wise, we first innovate a wavelet-tree representation to compactly encode shapes by formulating the subband coefficient filtering scheme to efficiently exploit coefficient relations. We then make the representation generatable by a diffusion model by devising the subband coefficients packing scheme to layout the representation in a low-resolution grid. Further, we derive the subband adaptive training strategy to train our model to effectively learn to generate coarse and detail wavelet coefficients. Last, we extend our framework to be controlled by additional input conditions to enable it to generate shapes from assorted modalities, e.g., single/multi-view images, point clouds, and low-resolution voxels. In our extensive set of experiments, we demonstrate various applications, such as unconditional generation, shape completion, and conditional generation on a wide range of modalities. Our approach not only surpasses the state of the art in delivering high-quality results but also efficiently generates shapes within a few seconds, often achieving this in just 2 seconds for most conditions.
   </center>.<br><br>
   <hr>
   <br>
